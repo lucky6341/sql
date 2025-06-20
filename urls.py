@@ -1,5 +1,6 @@
-# urls.py - Complete URL configuration with all API endpoints
+# urls.py - Complete URL Configuration for TechySQL Academy
 from django.urls import path, include
+from django.contrib import admin
 from rest_framework.routers import DefaultRouter
 from . import views
 from .views import (
@@ -15,6 +16,9 @@ router.register(r'achievements', AchievementViewSet, basename='achievement')
 router.register(r'learning-paths', LearningPathViewSet, basename='learningpath')
 
 urlpatterns = [
+    # Admin
+    path('admin/', admin.site.urls),
+    
     # API Endpoints
     path('api/', include(router.urls)),
     
@@ -25,8 +29,11 @@ urlpatterns = [
     path('datasets/<uuid:dataset_id>/rate/', views.dataset_rate, name='dataset_rate'),
     path('datasets/<uuid:dataset_id>/questions/', views.dataset_questions, name='dataset_questions'),
     
-    # Batch Processing
-    path('api/datasets/batch-process/', views.process_csv_folder, name='batch_process'),
+    # Query Execution
+    path('playground/', views.QueryPlaygroundView.as_view(), name='query_playground'),
+    path('api/execute/playground/', views.execute_playground_query, name='execute_playground_query'),
+    path('api/execute/batch/', views.execute_batch_queries, name='execute_batch_queries'),
+    path('api/visualize/plan/', views.visualize_query_plan, name='visualize_query_plan'),
     
     # Question Execution
     path('questions/<uuid:pk>/', views.QuestionDetailView.as_view(), name='question_detail'),
@@ -34,8 +41,12 @@ urlpatterns = [
     path('questions/<uuid:question_id>/hint/', views.get_hint, name='get_hint'),
     path('questions/<uuid:question_id>/solution/', views.view_solution, name='view_solution'),
     
+    # Batch Processing
+    path('batch-processing/', views.BatchProcessingView.as_view(), name='batch_processing'),
+    path('api/datasets/batch-process/', views.process_csv_folder, name='batch_process'),
+    
     # AI Features
-    path('api/ai/generate-questions/', views.generate_practice_questions, name='generate_questions'),
+    path('api/ai/generate-practice/', views.generate_ai_practice, name='generate_ai_practice'),
     path('api/ai/explain-query/', views.explain_query, name='explain_query'),
     path('api/ai/feedback/', views.get_ai_feedback, name='ai_feedback'),
     
@@ -53,17 +64,14 @@ urlpatterns = [
     # Authentication
     path('accounts/', include('django.contrib.auth.urls')),
     
-    # Admin
-    path('admin/datasets/export/', views.export_datasets, name='export_datasets'),
-    
     # Error Handling
-    path('400/', views.bad_request, name='bad_request'),
-    path('403/', views.permission_denied, name='permission_denied'),
-    path('404/', views.page_not_found, name='page_not_found'),
-    path('500/', views.server_error, name='server_error'),
+    path('400/', views.custom_400, name='bad_request'),
+    path('403/', views.custom_403, name='permission_denied'),
+    path('404/', views.custom_404, name='page_not_found'),
+    path('500/', views.custom_500, name='server_error'),
 ]
 
-handler400 = 'techysql.views.bad_request'
-handler403 = 'techysql.views.permission_denied'
-handler404 = 'techysql.views.page_not_found'
-handler500 = 'techysql.views.server_error'
+handler400 = 'techysql.views.custom_400'
+handler403 = 'techysql.views.custom_403'
+handler404 = 'techysql.views.custom_404'
+handler500 = 'techysql.views.custom_500'
