@@ -1,0 +1,537 @@
+{% extends "sql_code_editor/base.html" %}
+{% load static %}
+
+{% block title %}Datasets - TechySQL Academy{% endblock %}
+
+{% block extra_css %}
+<style>
+.datasets-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.datasets-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.datasets-header h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 1rem;
+}
+
+.datasets-header p {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.filters-section {
+    margin-bottom: 3rem;
+    padding: 2rem;
+    border-radius: 15px;
+}
+
+.filters-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-label {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.filter-select, .filter-input {
+    padding: 0.75rem 1rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.filter-select:focus, .filter-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.filter-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+}
+
+.datasets-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    gap: 2rem;
+}
+
+.dataset-card {
+    padding: 0;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.dataset-card:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
+}
+
+.dataset-header {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+    border-bottom: 1px solid var(--glass-border);
+    position: relative;
+}
+
+.dataset-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.dataset-industry {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--primary);
+    color: var(--bg-primary);
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dataset-difficulty {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dataset-difficulty.beginner {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--secondary);
+    border: 1px solid var(--secondary);
+}
+
+.dataset-difficulty.intermediate {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.dataset-difficulty.advanced {
+    background: rgba(139, 92, 246, 0.2);
+    color: var(--accent);
+    border: 1px solid var(--accent);
+}
+
+.dataset-difficulty.expert {
+    background: rgba(239, 68, 68, 0.2);
+    color: #EF4444;
+    border: 1px solid #EF4444;
+}
+
+.dataset-body {
+    padding: 1.5rem;
+}
+
+.dataset-description {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.dataset-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 0.75rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+}
+
+.stat-value {
+    display: block;
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dataset-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.dataset-tag {
+    padding: 0.25rem 0.5rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.dataset-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.dataset-actions .btn-cyber,
+.dataset-actions .btn-outline-cyber {
+    flex: 1;
+    justify-content: center;
+    font-size: 0.9rem;
+    padding: 0.75rem 1rem;
+}
+
+.rating-display {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--glass-border);
+}
+
+.stars {
+    color: #F59E0B;
+}
+
+.rating-text {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.no-datasets {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: var(--text-secondary);
+}
+
+.no-datasets i {
+    font-size: 4rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+}
+
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 3rem;
+}
+
+.pagination a,
+.pagination span {
+    padding: 0.75rem 1rem;
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.pagination a:hover {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--bg-primary);
+}
+
+.pagination .current {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--bg-primary);
+}
+
+@media (max-width: 768px) {
+    .datasets-container {
+        padding: 1rem;
+    }
+    
+    .filters-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .datasets-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .dataset-stats {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .dataset-actions {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="datasets-container">
+    <div class="datasets-header animate-on-scroll">
+        <h1 class="cyberpunk-text">SQL Datasets</h1>
+        <p>Explore our collection of real-world datasets and start your SQL journey</p>
+    </div>
+    
+    <!-- Filters Section -->
+    <div class="filters-section glass-card animate-on-scroll">
+        <form method="GET" id="filter-form">
+            <div class="filters-grid">
+                <div class="filter-group">
+                    <label class="filter-label">Search</label>
+                    <input type="text" name="search" class="filter-input" 
+                           placeholder="Search datasets..." 
+                           value="{{ request.GET.search }}">
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Industry</label>
+                    <select name="industry" class="filter-select">
+                        <option value="">All Industries</option>
+                        {% for industry in industries %}
+                        <option value="{{ industry.slug }}" 
+                                {% if request.GET.industry == industry.slug %}selected{% endif %}>
+                            {{ industry.name }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Difficulty</label>
+                    <select name="difficulty" class="filter-select">
+                        <option value="">All Levels</option>
+                        <option value="BEGINNER" {% if request.GET.difficulty == 'BEGINNER' %}selected{% endif %}>Beginner</option>
+                        <option value="INTERMEDIATE" {% if request.GET.difficulty == 'INTERMEDIATE' %}selected{% endif %}>Intermediate</option>
+                        <option value="ADVANCED" {% if request.GET.difficulty == 'ADVANCED' %}selected{% endif %}>Advanced</option>
+                        <option value="EXPERT" {% if request.GET.difficulty == 'EXPERT' %}selected{% endif %}>Expert</option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label class="filter-label">Sort By</label>
+                    <select name="sort" class="filter-select">
+                        <option value="-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Newest First</option>
+                        <option value="name" {% if request.GET.sort == 'name' %}selected{% endif %}>Name A-Z</option>
+                        <option value="-avg_rating" {% if request.GET.sort == '-avg_rating' %}selected{% endif %}>Highest Rated</option>
+                        <option value="-total_attempts" {% if request.GET.sort == '-total_attempts' %}selected{% endif %}>Most Popular</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filter-actions">
+                <button type="submit" class="btn-cyber">
+                    <i class="fas fa-search"></i> Apply Filters
+                </button>
+                <a href="{% url 'dataset_list' %}" class="btn-outline-cyber">
+                    <i class="fas fa-times"></i> Clear Filters
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Datasets Grid -->
+    {% if datasets %}
+    <div class="datasets-grid">
+        {% for dataset in datasets %}
+        <div class="dataset-card glass-card animate-on-scroll">
+            <div class="dataset-header">
+                <div class="dataset-difficulty {{ dataset.difficulty|lower }}">
+                    {{ dataset.get_difficulty_display }}
+                </div>
+                <h3 class="dataset-title">{{ dataset.name }}</h3>
+                <span class="dataset-industry">{{ dataset.industry.name }}</span>
+            </div>
+            
+            <div class="dataset-body">
+                <p class="dataset-description">{{ dataset.description }}</p>
+                
+                <div class="dataset-stats">
+                    <div class="stat-item">
+                        <span class="stat-value">{{ dataset.question_count|default:0 }}</span>
+                        <span class="stat-label">Questions</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ dataset.completion_rate|floatformat:0 }}%</span>
+                        <span class="stat-label">Success Rate</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value">{{ dataset.total_attempts|default:0 }}</span>
+                        <span class="stat-label">Attempts</span>
+                    </div>
+                </div>
+                
+                {% if dataset.tags %}
+                <div class="dataset-tags">
+                    {% for tag in dataset.tags|slice:":3" %}
+                    <span class="dataset-tag">{{ tag }}</span>
+                    {% endfor %}
+                    {% if dataset.tags|length > 3 %}
+                    <span class="dataset-tag">+{{ dataset.tags|length|add:"-3" }} more</span>
+                    {% endif %}
+                </div>
+                {% endif %}
+                
+                <div class="dataset-actions">
+                    <a href="{% url 'dataset_detail' pk=dataset.id %}" class="btn-cyber">
+                        <i class="fas fa-play"></i> Start Learning
+                    </a>
+                    <a href="{% url 'dataset_detail' pk=dataset.id %}" class="btn-outline-cyber">
+                        <i class="fas fa-info-circle"></i> Details
+                    </a>
+                </div>
+                
+                {% if dataset.avg_rating > 0 %}
+                <div class="rating-display">
+                    <div class="stars">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= dataset.avg_rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <span class="rating-text">{{ dataset.avg_rating|floatformat:1 }} ({{ dataset.ratings.count }} reviews)</span>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page=1">
+                <i class="fas fa-angle-double-left"></i> First
+            </a>
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.previous_page_number }}">
+                <i class="fas fa-angle-left"></i> Previous
+            </a>
+        {% endif %}
+        
+        <span class="current">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        
+        {% if page_obj.has_next %}
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.next_page_number }}">
+                Next <i class="fas fa-angle-right"></i>
+            </a>
+            <a href="?{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}page={{ page_obj.paginator.num_pages }}">
+                Last <i class="fas fa-angle-double-right"></i>
+            </a>
+        {% endif %}
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div class="no-datasets glass-card animate-on-scroll">
+        <i class="fas fa-database"></i>
+        <h3>No datasets found</h3>
+        <p>Try adjusting your filters or check back later for new datasets.</p>
+        {% if user.is_authenticated %}
+        <a href="{% url 'dataset_upload' %}" class="btn-cyber" style="margin-top: 1rem;">
+            <i class="fas fa-upload"></i> Upload Your Own Dataset
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-submit form on filter change
+    const filterForm = document.getElementById('filter-form');
+    const filterSelects = filterForm.querySelectorAll('select');
+    
+    filterSelects.forEach(select => {
+        select.addEventListener('change', () => {
+            filterForm.submit();
+        });
+    });
+    
+    // Debounced search
+    const searchInput = filterForm.querySelector('input[name="search"]');
+    let searchTimeout;
+    
+    searchInput.addEventListener('input', () => {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(() => {
+            filterForm.submit();
+        }, 500);
+    });
+    
+    // Initialize scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
+    });
+});
+</script>
+{% endblock %}

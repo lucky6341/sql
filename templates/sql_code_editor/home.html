@@ -1,0 +1,599 @@
+{% extends "sql_code_editor/base.html" %}
+{% load static %}
+
+{% block title %}TechySQL Academy - Master SQL with AI{% endblock %}
+
+{% block extra_css %}
+<style>
+/* Hero Section Specific Styles */
+.sql-hero {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    position: relative;
+    background: 
+        radial-gradient(ellipse at 30% 70%, rgba(0, 255, 255, 0.15) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 30%, rgba(255, 0, 255, 0.15) 0%, transparent 50%),
+        var(--bg-primary);
+    padding: 120px 2rem 80px;
+    overflow: hidden;
+}
+
+.sql-hero::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M 20 0 L 0 0 0 20" fill="none" stroke="%2300ffff" stroke-width="0.5" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+    opacity: 0.4;
+    z-index: 1;
+    animation: gridPulse 4s ease-in-out infinite;
+}
+
+@keyframes gridPulse {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.4; }
+}
+
+.hero-container {
+    max-width: 1400px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-content h1 {
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    margin-bottom: 2rem;
+    line-height: 0.9;
+    position: relative;
+}
+
+.hero-content .lead {
+    font-size: 1.4rem;
+    color: var(--text-secondary);
+    margin-bottom: 2.5rem;
+    line-height: 1.6;
+    font-weight: 500;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.hero-visual {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 400px;
+}
+
+.floating-sql-element {
+    position: absolute;
+    width: 80px;
+    height: 80px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    animation: float 6s ease-in-out infinite;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.floating-sql-element:nth-child(1) { 
+    top: 5%; 
+    left: 15%; 
+    animation-delay: 0s; 
+    background: linear-gradient(45deg, var(--neon-green), var(--accent));
+}
+.floating-sql-element:nth-child(2) { 
+    top: 15%; 
+    right: 10%; 
+    animation-delay: 1.5s; 
+    background: linear-gradient(45deg, var(--primary), var(--electric-blue));
+}
+.floating-sql-element:nth-child(3) { 
+    bottom: 25%; 
+    left: 5%; 
+    animation-delay: 3s; 
+    background: linear-gradient(45deg, var(--warning-orange), var(--neon-yellow));
+}
+.floating-sql-element:nth-child(4) { 
+    bottom: 10%; 
+    right: 15%; 
+    animation-delay: 4.5s; 
+    background: linear-gradient(45deg, var(--secondary), var(--cyber-purple));
+}
+
+.hero-center-element {
+    width: 350px;
+    height: 350px;
+    border-radius: 50%;
+    background: var(--glass-bg);
+    border: 3px solid var(--glass-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    animation: centerPulse 4s ease-in-out infinite;
+    box-shadow: 
+        0 0 50px var(--primary-glow),
+        inset 0 0 50px rgba(0, 255, 255, 0.1);
+}
+
+.hero-center-element::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--primary), var(--secondary), var(--accent), var(--primary));
+    background-size: 400% 400%;
+    z-index: -1;
+    animation: gradientRotate 3s linear infinite;
+}
+
+.inner-ring {
+    width: 250px;
+    height: 250px;
+    border-radius: 50%;
+    background: var(--bg-secondary);
+    border: 2px solid var(--secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 
+        0 0 30px var(--secondary-glow),
+        inset 0 0 30px rgba(255, 0, 255, 0.1);
+}
+
+.sql-symbol {
+    font-size: 4rem;
+    color: var(--primary);
+    text-shadow: var(--neon-text-shadow);
+    animation: iconFloat 3s ease-in-out infinite;
+}
+
+@keyframes float {
+    0%, 100% { 
+        transform: translateY(0px) rotate(0deg); 
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    25% { 
+        transform: translateY(-25px) rotate(5deg); 
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    50% { 
+        transform: translateY(0px) rotate(0deg); 
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    75% { 
+        transform: translateY(-15px) rotate(-5deg); 
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.35);
+    }
+}
+
+@keyframes centerPulse {
+    0%, 100% { 
+        transform: scale(1); 
+        box-shadow: 0 0 50px var(--primary-glow);
+    }
+    50% { 
+        transform: scale(1.05); 
+        box-shadow: 0 0 80px var(--primary-glow);
+    }
+}
+
+@keyframes iconFloat {
+    0%, 100% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+}
+
+/* Features Grid */
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.feature-card {
+    padding: 2rem;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.feature-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--hover-shadow);
+}
+
+.feature-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 1.5rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    border-radius: var(--border-radius);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    color: white;
+    transition: all 0.3s ease;
+}
+
+.feature-card:hover .feature-icon {
+    transform: scale(1.05);
+    background: linear-gradient(135deg, var(--primary-light), var(--primary));
+}
+
+.feature-card h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.75rem;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.feature-card p {
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    line-height: 1.6;
+    font-size: 0.95rem;
+    flex-grow: 1;
+}
+
+/* Stats Section */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+}
+
+.stat-card {
+    text-align: center;
+    padding: 2rem;
+}
+
+.stat-number {
+    font-family: 'Orbitron', monospace;
+    font-size: 3rem;
+    font-weight: 900;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+/* Responsive Design */
+@media (max-width: 968px) {
+    .hero-container {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+        text-align: center;
+    }
+    
+    .hero-visual {
+        order: -1;
+        height: 300px;
+    }
+    
+    .hero-center-element {
+        width: 280px;
+        height: 280px;
+    }
+    
+    .inner-ring {
+        width: 200px;
+        height: 200px;
+    }
+    
+    .floating-sql-element {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .sql-hero {
+        padding: 100px 1rem 60px;
+    }
+    
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .btn-cyber, .btn-outline-cyber {
+        width: 100%;
+        max-width: 280px;
+        justify-content: center;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="sql-hero" id="hero">
+    <div class="hero-container">
+        <div class="hero-content">
+            <h1 class="display-text cyberpunk-text glow-text">
+                Master SQL with 
+                <span class="gradient-text">AI-Powered Learning</span>
+            </h1>
+            <p class="lead">
+                Transform from SQL beginner to expert with our revolutionary AI mentorship, 
+                real-world datasets, and gamified challenges. Join thousands of developers 
+                advancing their data careers.
+            </p>
+            <div class="hero-buttons">
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="btn-cyber">
+                        <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+                    </a>
+                    <a href="{% url 'query_playground' %}" class="btn-outline-cyber">
+                        <i class="fas fa-play"></i> Start Practicing
+                    </a>
+                {% else %}
+                    <a href="{% url 'signup' %}" class="btn-cyber">
+                        <i class="fas fa-rocket"></i> Start Learning
+                    </a>
+                    <a href="{% url 'dataset_list' %}" class="btn-outline-cyber">
+                        <i class="fas fa-database"></i> Explore Datasets
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="hero-visual">
+            <div class="floating-sql-element">
+                <i class="fas fa-database"></i>
+            </div>
+            <div class="floating-sql-element">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <div class="floating-sql-element">
+                <i class="fas fa-robot"></i>
+            </div>
+            <div class="floating-sql-element">
+                <i class="fas fa-trophy"></i>
+            </div>
+            <div class="hero-center-element">
+                <div class="inner-ring">
+                    <div class="sql-symbol">
+                        SQL
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="section" id="features">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <h2 class="cyberpunk-text">Revolutionary SQL Learning</h2>
+            <p>Experience the future of SQL education with cutting-edge AI technology and real-world practice</p>
+        </div>
+        
+        <div class="features-grid">
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon">
+                    <i class="fas fa-robot"></i>
+                </div>
+                <h3>AI-Powered Mentorship</h3>
+                <p>Get personalized guidance from our advanced AI that adapts to your learning style and provides instant feedback on your SQL queries.</p>
+                <a href="{% url 'query_playground' %}" class="btn-outline-cyber">
+                    <i class="fas fa-brain"></i> Try AI Mentor
+                </a>
+            </div>
+            
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <h3>Real-World Datasets</h3>
+                <p>Practice with authentic datasets from e-commerce, healthcare, finance, and more. Learn SQL with data that matters.</p>
+                <a href="{% url 'dataset_list' %}" class="btn-outline-cyber">
+                    <i class="fas fa-search"></i> Browse Datasets
+                </a>
+            </div>
+            
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon">
+                    <i class="fas fa-gamepad"></i>
+                </div>
+                <h3>Gamified Learning</h3>
+                <p>Earn points, unlock achievements, and climb leaderboards. Make learning SQL addictive with our game-like progression system.</p>
+                <a href="{% url 'leaderboard' %}" class="btn-outline-cyber">
+                    <i class="fas fa-trophy"></i> View Leaderboard
+                </a>
+            </div>
+            
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon">
+                    <i class="fas fa-route"></i>
+                </div>
+                <h3>Structured Learning Paths</h3>
+                <p>Follow expertly designed curricula that take you from SQL basics to advanced data engineering concepts step by step.</p>
+                <a href="{% url 'learningpath_list' %}" class="btn-outline-cyber">
+                    <i class="fas fa-map"></i> Explore Paths
+                </a>
+            </div>
+            
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <h3>Advanced Analytics</h3>
+                <p>Track your progress with detailed analytics, identify weak areas, and get personalized recommendations for improvement.</p>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'progress' %}" class="btn-outline-cyber">
+                        <i class="fas fa-analytics"></i> View Progress
+                    </a>
+                {% else %}
+                    <a href="{% url 'signup' %}" class="btn-outline-cyber">
+                        <i class="fas fa-user-plus"></i> Join Now
+                    </a>
+                {% endif %}
+            </div>
+            
+            <div class="feature-card glass-card animate-on-scroll">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>Community Learning</h3>
+                <p>Connect with fellow SQL learners, share solutions, participate in challenges, and learn from the community.</p>
+                <a href="#" class="btn-outline-cyber">
+                    <i class="fas fa-comments"></i> Join Community
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Stats Section -->
+<section class="section code-section" id="stats">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <h2 class="cyberpunk-text">Join the SQL Revolution</h2>
+            <p>Thousands of developers are already mastering SQL with TechySQL Academy</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card glass-card animate-on-scroll">
+                <span class="stat-number">50K+</span>
+                <span class="stat-label">Active Learners</span>
+            </div>
+            
+            <div class="stat-card glass-card animate-on-scroll">
+                <span class="stat-number">500+</span>
+                <span class="stat-label">Real Datasets</span>
+            </div>
+            
+            <div class="stat-card glass-card animate-on-scroll">
+                <span class="stat-number">10K+</span>
+                <span class="stat-label">SQL Challenges</span>
+            </div>
+            
+            <div class="stat-card glass-card animate-on-scroll">
+                <span class="stat-number">95%</span>
+                <span class="stat-label">Success Rate</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- CTA Section -->
+<section class="section" id="cta">
+    <div class="container">
+        <div class="section-header animate-on-scroll">
+            <h2 class="cyberpunk-text">Ready to Master SQL?</h2>
+            <p>Start your journey today and transform your data career with AI-powered learning</p>
+        </div>
+        
+        <div class="text-center animate-on-scroll">
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}" class="btn-cyber" style="font-size: 1.2rem; padding: 1.25rem 2.5rem;">
+                    <i class="fas fa-rocket"></i> Continue Learning
+                </a>
+            {% else %}
+                <a href="{% url 'signup' %}" class="btn-cyber" style="font-size: 1.2rem; padding: 1.25rem 2.5rem;">
+                    <i class="fas fa-rocket"></i> Start Free Today
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+    
+    // Observe all elements with animate-on-scroll class
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
+    });
+    
+    // Animate stats numbers
+    function animateStats() {
+        const statNumbers = document.querySelectorAll('.stat-number');
+        
+        statNumbers.forEach(stat => {
+            const target = parseInt(stat.textContent.replace(/[^\d]/g, ''));
+            const suffix = stat.textContent.replace(/[\d]/g, '');
+            let current = 0;
+            const increment = target / 50;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    current = target;
+                    clearInterval(timer);
+                }
+                stat.textContent = Math.floor(current) + suffix;
+            }, 50);
+        });
+    }
+    
+    // Trigger stats animation when section is visible
+    const statsSection = document.getElementById('stats');
+    if (statsSection) {
+        const statsObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    animateStats();
+                    statsObserver.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.5 });
+        
+        statsObserver.observe(statsSection);
+    }
+});
+</script>
+{% endblock %}

@@ -1,0 +1,899 @@
+{% extends "sql_code_editor/base.html" %}
+{% load static %}
+
+{% block title %}SQL Playground - TechySQL Academy{% endblock %}
+
+{% block extra_css %}
+<style>
+.playground-container {
+    padding: 2rem;
+    max-width: 1600px;
+    margin: 0 auto;
+    height: calc(100vh - 120px);
+    display: flex;
+    flex-direction: column;
+}
+
+.playground-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.playground-header h1 {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 1rem;
+}
+
+.playground-header p {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.playground-layout {
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    gap: 2rem;
+    flex: 1;
+    min-height: 0;
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.sidebar-section {
+    padding: 1.5rem;
+    border-radius: 12px;
+}
+
+.sidebar-section h3 {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.dataset-selector select {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--bg-tertiary);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 1rem;
+}
+
+.dataset-selector select:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+}
+
+.schema-viewer {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.table-schema {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+}
+
+.table-schema h4 {
+    color: var(--secondary);
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+}
+
+.table-schema ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.table-schema li {
+    padding: 0.25rem 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.table-schema strong {
+    color: var(--text-primary);
+}
+
+.main-editor {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.editor-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 12px 12px 0 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.editor-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.editor-actions button {
+    padding: 0.5rem 1rem;
+    background: var(--primary);
+    border: none;
+    border-radius: 6px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.editor-actions button:hover {
+    background: var(--primary-light);
+    transform: translateY(-1px);
+}
+
+.editor-actions button:disabled {
+    background: var(--text-muted);
+    cursor: not-allowed;
+    transform: none;
+}
+
+.editor-wrapper {
+    flex: 1;
+    position: relative;
+    background: var(--bg-tertiary);
+    border-radius: 0 0 12px 12px;
+    overflow: hidden;
+}
+
+.sql-editor {
+    width: 100%;
+    height: 100%;
+    background: var(--bg-tertiary);
+    color: var(--text-primary);
+    border: none;
+    padding: 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+}
+
+.results-section {
+    margin-top: 2rem;
+    background: var(--glass-bg);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.results-tabs {
+    display: flex;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.tab-button {
+    padding: 1rem 1.5rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border-bottom: 3px solid transparent;
+}
+
+.tab-button.active {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: var(--glass-bg);
+}
+
+.tab-button:hover {
+    color: var(--text-primary);
+    background: var(--bg-hover);
+}
+
+.tab-content {
+    padding: 1.5rem;
+    min-height: 300px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.result-stats {
+    display: flex;
+    gap: 2rem;
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+}
+
+.stat-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+.stat-value {
+    color: var(--primary);
+    font-weight: 700;
+    font-family: 'Orbitron', monospace;
+}
+
+.result-table-container {
+    overflow: auto;
+    max-height: 400px;
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+}
+
+.result-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.85rem;
+}
+
+.result-table th {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    padding: 0.75rem;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 1px solid var(--glass-border);
+    position: sticky;
+    top: 0;
+}
+
+.result-table td {
+    padding: 0.75rem;
+    border-bottom: 1px solid var(--glass-border);
+    color: var(--text-secondary);
+}
+
+.result-table tr:hover {
+    background: var(--bg-hover);
+}
+
+.error-panel {
+    padding: 1.5rem;
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid #EF4444;
+    border-radius: 8px;
+    color: #EF4444;
+}
+
+.error-panel h4 {
+    margin-bottom: 1rem;
+    color: #EF4444;
+}
+
+.performance-metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.metric-card {
+    padding: 1rem;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    text-align: center;
+}
+
+.metric-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+    font-family: 'Orbitron', monospace;
+}
+
+.metric-label {
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+.sample-data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+    margin-top: 0.5rem;
+}
+
+.sample-data-table th,
+.sample-data-table td {
+    padding: 0.5rem;
+    border: 1px solid var(--glass-border);
+    text-align: left;
+}
+
+.sample-data-table th {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.sample-data-table td {
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+@media (max-width: 1200px) {
+    .playground-layout {
+        grid-template-columns: 250px 1fr;
+    }
+}
+
+@media (max-width: 968px) {
+    .playground-layout {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+    }
+    
+    .sidebar {
+        flex-direction: row;
+        overflow-x: auto;
+    }
+    
+    .sidebar-section {
+        min-width: 250px;
+    }
+}
+
+@media (max-width: 768px) {
+    .playground-container {
+        padding: 1rem;
+    }
+    
+    .editor-actions {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+    
+    .editor-actions button {
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+    }
+    
+    .result-stats {
+        flex-direction: column;
+        gap: 1rem;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="playground-container">
+    <div class="playground-header animate-on-scroll">
+        <h1 class="cyberpunk-text">SQL Playground</h1>
+        <p>Practice SQL queries with real datasets. Experiment, learn, and master SQL in our interactive environment.</p>
+    </div>
+    
+    <div class="playground-layout">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Dataset Selector -->
+            <div class="sidebar-section glass-card animate-on-scroll">
+                <h3><i class="fas fa-database"></i> Dataset</h3>
+                <div class="dataset-selector">
+                    <select id="dataset-select">
+                        <option value="">Select a dataset...</option>
+                        {% for dataset in datasets %}
+                        <option value="{{ dataset.id }}">{{ dataset.name }} ({{ dataset.difficulty }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <!-- Schema Viewer -->
+            <div class="sidebar-section glass-card animate-on-scroll">
+                <h3><i class="fas fa-sitemap"></i> Schema</h3>
+                <div class="schema-viewer" id="schema-content">
+                    <p style="color: var(--text-muted); text-align: center; padding: 2rem;">
+                        Select a dataset to view its schema
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Sample Data -->
+            <div class="sidebar-section glass-card animate-on-scroll">
+                <h3><i class="fas fa-table"></i> Sample Data</h3>
+                <div class="sample-data" id="sample-data-content">
+                    <p style="color: var(--text-muted); text-align: center; padding: 2rem;">
+                        Select a dataset to view sample data
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Editor -->
+        <div class="main-editor animate-on-scroll">
+            <div class="editor-toolbar glass-card">
+                <div class="editor-info">
+                    <span id="current-dataset" style="color: var(--text-secondary);">No dataset selected</span>
+                </div>
+                <div class="editor-actions">
+                    <button id="execute-btn" disabled>
+                        <i class="fas fa-play"></i> Execute
+                    </button>
+                    <button id="format-btn">
+                        <i class="fas fa-magic"></i> Format
+                    </button>
+                    <button id="explain-btn" disabled>
+                        <i class="fas fa-lightbulb"></i> Explain
+                    </button>
+                    <button id="save-btn">
+                        <i class="fas fa-save"></i> Save
+                    </button>
+                </div>
+            </div>
+            
+            <div class="editor-wrapper">
+                <textarea id="sql-editor" class="sql-editor" placeholder="-- Welcome to TechySQL Academy Playground!
+-- Select a dataset from the sidebar and start writing SQL queries
+-- 
+-- Example queries to try:
+-- SELECT * FROM table_name LIMIT 10;
+-- SELECT column1, column2 FROM table_name WHERE condition;
+-- SELECT COUNT(*) FROM table_name;
+
+SELECT 'Hello, SQL World!' as greeting;">-- Welcome to TechySQL Academy Playground!
+-- Select a dataset from the sidebar and start writing SQL queries
+-- 
+-- Example queries to try:
+-- SELECT * FROM table_name LIMIT 10;
+-- SELECT column1, column2 FROM table_name WHERE condition;
+-- SELECT COUNT(*) FROM table_name;
+
+SELECT 'Hello, SQL World!' as greeting;</textarea>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Results Section -->
+    <div class="results-section glass-card animate-on-scroll">
+        <div class="results-tabs">
+            <button class="tab-button active" data-tab="results">
+                <i class="fas fa-table"></i> Results
+            </button>
+            <button class="tab-button" data-tab="performance">
+                <i class="fas fa-tachometer-alt"></i> Performance
+            </button>
+            <button class="tab-button" data-tab="explanation">
+                <i class="fas fa-lightbulb"></i> Explanation
+            </button>
+        </div>
+        
+        <div class="tab-content">
+            <!-- Results Tab -->
+            <div class="tab-pane active" id="results-tab">
+                <div class="result-stats" id="result-stats" style="display: none;">
+                    <div class="stat-item">
+                        <i class="fas fa-list-ol"></i>
+                        <span>Rows: <span class="stat-value" id="row-count">0</span></span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Time: <span class="stat-value" id="execution-time">0ms</span></span>
+                    </div>
+                    <div class="stat-item">
+                        <i class="fas fa-columns"></i>
+                        <span>Columns: <span class="stat-value" id="column-count">0</span></span>
+                    </div>
+                </div>
+                
+                <div class="result-table-container" id="result-container">
+                    <div style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                        <i class="fas fa-play-circle" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                        <p>Execute a query to see results here</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Performance Tab -->
+            <div class="tab-pane" id="performance-tab">
+                <div class="performance-metrics" id="performance-metrics">
+                    <div class="metric-card">
+                        <div class="metric-value" id="perf-score">--</div>
+                        <div class="metric-label">Performance Score</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="query-complexity">--</div>
+                        <div class="metric-label">Complexity</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-value" id="optimization-score">--</div>
+                        <div class="metric-label">Optimization</div>
+                    </div>
+                </div>
+                
+                <div id="optimization-suggestions" style="margin-top: 2rem;">
+                    <h4>Optimization Suggestions</h4>
+                    <p style="color: var(--text-muted);">Execute a query to see performance analysis</p>
+                </div>
+            </div>
+            
+            <!-- Explanation Tab -->
+            <div class="tab-pane" id="explanation-tab">
+                <div id="query-explanation">
+                    <p style="color: var(--text-muted); text-align: center; padding: 3rem;">
+                        Click "Explain" to get an AI-powered explanation of your query
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Error Panel -->
+    <div id="error-panel" class="error-panel" style="display: none; margin-top: 1rem;">
+        <h4><i class="fas fa-exclamation-triangle"></i> Error</h4>
+        <div id="error-message"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize playground
+    const datasetSelect = document.getElementById('dataset-select');
+    const sqlEditor = document.getElementById('sql-editor');
+    const executeBtn = document.getElementById('execute-btn');
+    const formatBtn = document.getElementById('format-btn');
+    const explainBtn = document.getElementById('explain-btn');
+    const saveBtn = document.getElementById('save-btn');
+    
+    let currentDatasetId = null;
+    
+    // Dataset selection
+    datasetSelect.addEventListener('change', function() {
+        currentDatasetId = this.value;
+        if (currentDatasetId) {
+            loadDatasetInfo(currentDatasetId);
+            executeBtn.disabled = false;
+            explainBtn.disabled = false;
+            document.getElementById('current-dataset').textContent = 
+                this.options[this.selectedIndex].text;
+        } else {
+            executeBtn.disabled = true;
+            explainBtn.disabled = true;
+            document.getElementById('current-dataset').textContent = 'No dataset selected';
+            clearDatasetInfo();
+        }
+    });
+    
+    // Execute query
+    executeBtn.addEventListener('click', executeQuery);
+    
+    // Format SQL
+    formatBtn.addEventListener('click', function() {
+        const formatted = formatSQL(sqlEditor.value);
+        sqlEditor.value = formatted;
+    });
+    
+    // Explain query
+    explainBtn.addEventListener('click', explainQuery);
+    
+    // Save query
+    saveBtn.addEventListener('click', function() {
+        // Implement save functionality
+        alert('Save functionality will be implemented');
+    });
+    
+    // Tab switching
+    document.querySelectorAll('.tab-button').forEach(button => {
+        button.addEventListener('click', function() {
+            const tabId = this.dataset.tab;
+            switchTab(tabId);
+        });
+    });
+    
+    // Functions
+    function loadDatasetInfo(datasetId) {
+        // Load schema
+        fetch(`/sql/api/datasets/${datasetId}/`)
+        .then(response => response.json())
+        .then(data => {
+            displaySchema(data.schema);
+            displaySampleData(data.sample_data);
+        })
+        .catch(error => {
+            console.error('Error loading dataset info:', error);
+        });
+    }
+    
+    function clearDatasetInfo() {
+        document.getElementById('schema-content').innerHTML = 
+            '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">Select a dataset to view its schema</p>';
+        document.getElementById('sample-data-content').innerHTML = 
+            '<p style="color: var(--text-muted); text-align: center; padding: 2rem;">Select a dataset to view sample data</p>';
+    }
+    
+    function displaySchema(schema) {
+        const container = document.getElementById('schema-content');
+        let html = '';
+        
+        if (schema && schema.tables) {
+            schema.tables.forEach(table => {
+                html += `<div class="table-schema">`;
+                html += `<h4>${table.name}</h4>`;
+                html += `<ul>`;
+                table.columns.forEach(column => {
+                    html += `<li><strong>${column.name}</strong>: ${column.type}</li>`;
+                });
+                html += `</ul>`;
+                html += `</div>`;
+            });
+        }
+        
+        container.innerHTML = html || '<p style="color: var(--text-muted);">No schema available</p>';
+    }
+    
+    function displaySampleData(sampleData) {
+        const container = document.getElementById('sample-data-content');
+        let html = '';
+        
+        if (sampleData && Object.keys(sampleData).length > 0) {
+            for (const [tableName, rows] of Object.entries(sampleData)) {
+                html += `<h4>${tableName}</h4>`;
+                if (rows.length > 0) {
+                    const headers = Object.keys(rows[0]);
+                    html += `<table class="sample-data-table">`;
+                    html += `<thead><tr>`;
+                    headers.forEach(header => {
+                        html += `<th>${header}</th>`;
+                    });
+                    html += `</tr></thead><tbody>`;
+                    
+                    rows.slice(0, 3).forEach(row => {
+                        html += `<tr>`;
+                        headers.forEach(header => {
+                            html += `<td>${row[header]}</td>`;
+                        });
+                        html += `</tr>`;
+                    });
+                    html += `</tbody></table>`;
+                }
+            }
+        }
+        
+        container.innerHTML = html || '<p style="color: var(--text-muted);">No sample data available</p>';
+    }
+    
+    function executeQuery() {
+        const query = sqlEditor.value.trim();
+        if (!query) {
+            showError('Please enter a SQL query');
+            return;
+        }
+        
+        if (!currentDatasetId) {
+            showError('Please select a dataset first');
+            return;
+        }
+        
+        // Show loading state
+        executeBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Executing...';
+        executeBtn.disabled = true;
+        hideError();
+        
+        fetch('{% url "sql_code_editor:execute_playground_query" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                query: query,
+                dataset_id: currentDatasetId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                displayResults(data);
+                if (data.performance) {
+                    displayPerformance(data.performance);
+                }
+                switchTab('results');
+            } else {
+                showError(data.error);
+            }
+        })
+        .catch(error => {
+            showError('An unexpected error occurred: ' + error.message);
+        })
+        .finally(() => {
+            executeBtn.innerHTML = '<i class="fas fa-play"></i> Execute';
+            executeBtn.disabled = false;
+        });
+    }
+    
+    function displayResults(data) {
+        // Update stats
+        document.getElementById('row-count').textContent = data.row_count || 0;
+        document.getElementById('execution-time').textContent = (data.execution_time || 0) + 'ms';
+        document.getElementById('column-count').textContent = (data.columns || []).length;
+        document.getElementById('result-stats').style.display = 'flex';
+        
+        // Display table
+        const container = document.getElementById('result-container');
+        if (data.data && data.data.length > 0) {
+            let html = '<table class="result-table">';
+            
+            // Headers
+            html += '<thead><tr>';
+            data.columns.forEach(col => {
+                html += `<th>${col}</th>`;
+            });
+            html += '</tr></thead>';
+            
+            // Rows
+            html += '<tbody>';
+            data.data.forEach(row => {
+                html += '<tr>';
+                data.columns.forEach(col => {
+                    const value = row[col];
+                    html += `<td>${value !== null ? value : 'NULL'}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            
+            container.innerHTML = html;
+        } else {
+            container.innerHTML = '<div style="text-align: center; padding: 2rem; color: var(--text-muted);">No results returned</div>';
+        }
+    }
+    
+    function displayPerformance(performance) {
+        document.getElementById('perf-score').textContent = performance.performance_score || '--';
+        document.getElementById('query-complexity').textContent = 
+            performance.query_complexity ? (performance.query_complexity * 100).toFixed(0) + '%' : '--';
+        document.getElementById('optimization-score').textContent = 
+            performance.optimization_score || '--';
+        
+        // Display suggestions
+        const suggestionsContainer = document.getElementById('optimization-suggestions');
+        if (performance.optimization_suggestions && performance.optimization_suggestions.length > 0) {
+            let html = '<h4>Optimization Suggestions</h4><ul>';
+            performance.optimization_suggestions.forEach(suggestion => {
+                html += `<li>${suggestion}</li>`;
+            });
+            html += '</ul>';
+            suggestionsContainer.innerHTML = html;
+        } else {
+            suggestionsContainer.innerHTML = '<h4>Optimization Suggestions</h4><p style="color: var(--text-muted);">No suggestions available</p>';
+        }
+    }
+    
+    function explainQuery() {
+        const query = sqlEditor.value.trim();
+        if (!query) {
+            showError('Please enter a SQL query to explain');
+            return;
+        }
+        
+        explainBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Explaining...';
+        explainBtn.disabled = true;
+        
+        fetch('{% url "sql_code_editor:explain_query" %}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}'
+            },
+            body: JSON.stringify({
+                query: query,
+                dataset_id: currentDatasetId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('query-explanation').innerHTML = 
+                    `<div style="white-space: pre-wrap; line-height: 1.6;">${data.explanation}</div>`;
+                switchTab('explanation');
+            } else {
+                showError(data.error);
+            }
+        })
+        .catch(error => {
+            showError('Failed to explain query: ' + error.message);
+        })
+        .finally(() => {
+            explainBtn.innerHTML = '<i class="fas fa-lightbulb"></i> Explain';
+            explainBtn.disabled = false;
+        });
+    }
+    
+    function switchTab(tabId) {
+        // Update buttons
+        document.querySelectorAll('.tab-button').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-tab="${tabId}"]`).classList.add('active');
+        
+        // Update content
+        document.querySelectorAll('.tab-pane').forEach(pane => {
+            pane.classList.remove('active');
+        });
+        document.getElementById(`${tabId}-tab`).classList.add('active');
+    }
+    
+    function formatSQL(sql) {
+        // Simple SQL formatter
+        return sql
+            .replace(/\bSELECT\b/gi, '\nSELECT')
+            .replace(/\bFROM\b/gi, '\nFROM')
+            .replace(/\bWHERE\b/gi, '\nWHERE')
+            .replace(/\bGROUP BY\b/gi, '\nGROUP BY')
+            .replace(/\bORDER BY\b/gi, '\nORDER BY')
+            .replace(/\bHAVING\b/gi, '\nHAVING')
+            .replace(/\bJOIN\b/gi, '\nJOIN')
+            .replace(/\bINNER JOIN\b/gi, '\nINNER JOIN')
+            .replace(/\bLEFT JOIN\b/gi, '\nLEFT JOIN')
+            .replace(/\bRIGHT JOIN\b/gi, '\nRIGHT JOIN')
+            .trim();
+    }
+    
+    function showError(message) {
+        document.getElementById('error-message').textContent = message;
+        document.getElementById('error-panel').style.display = 'block';
+    }
+    
+    function hideError() {
+        document.getElementById('error-panel').style.display = 'none';
+    }
+    
+    // Initialize scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
+    });
+});
+</script>
+{% endblock %}

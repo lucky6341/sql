@@ -15,9 +15,12 @@ router.register(r'attempts', UserAttemptViewSet, basename='attempt')
 router.register(r'achievements', AchievementViewSet, basename='achievement')
 router.register(r'learning-paths', LearningPathViewSet, basename='learningpath')
 
+app_name = 'sql_code_editor'
+
 urlpatterns = [
-    # Admin
-    path('admin/', admin.site.urls),
+    # Home and Main Pages
+    path('', views.HomeView.as_view(), name='sql_home'),
+    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     
     # API Endpoints
     path('api/', include(router.urls)),
@@ -51,7 +54,6 @@ urlpatterns = [
     path('api/ai/feedback/', views.get_ai_feedback, name='ai_feedback'),
     
     # User Progress
-    path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
     path('profile/', views.UserProfileView.as_view(), name='profile'),
     path('progress/', views.UserProgressView.as_view(), name='progress'),
     path('leaderboard/', views.LeaderboardView.as_view(), name='leaderboard'),
@@ -63,15 +65,7 @@ urlpatterns = [
     
     # Authentication
     path('accounts/', include('django.contrib.auth.urls')),
-    
-    # Error Handling
-    path('400/', views.custom_400, name='bad_request'),
-    path('403/', views.custom_403, name='permission_denied'),
-    path('404/', views.custom_404, name='page_not_found'),
-    path('500/', views.custom_500, name='server_error'),
+    path('signup/', views.SignUpView.as_view(), name='signup'),
+    path('login/', views.LoginView.as_view(), name='login'),
+    path('logout/', views.LogoutView.as_view(), name='logout'),
 ]
-
-handler400 = 'techysql.views.custom_400'
-handler403 = 'techysql.views.custom_403'
-handler404 = 'techysql.views.custom_404'
-handler500 = 'techysql.views.custom_500'

@@ -1,0 +1,648 @@
+{% extends "sql_code_editor/base.html" %}
+{% load static %}
+
+{% block title %}{{ learning_path.name }} - TechySQL Academy{% endblock %}
+
+{% block extra_css %}
+<style>
+.learning-path-container {
+    padding: 2rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.path-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.path-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    margin-bottom: 1rem;
+}
+
+.path-meta {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--glass-bg);
+    border-radius: 25px;
+    border: 1px solid var(--glass-border);
+    font-weight: 600;
+}
+
+.difficulty-badge {
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.difficulty-badge.beginner {
+    background: linear-gradient(45deg, var(--secondary), #10B981);
+    color: var(--bg-primary);
+}
+
+.difficulty-badge.intermediate {
+    background: linear-gradient(45deg, var(--primary), var(--primary-dark));
+    color: var(--text-primary);
+}
+
+.difficulty-badge.advanced {
+    background: linear-gradient(45deg, var(--accent), var(--accent-dark));
+    color: var(--text-primary);
+}
+
+.path-description {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 800px;
+    margin: 0 auto 2rem;
+}
+
+.path-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.path-content {
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 3rem;
+}
+
+.datasets-section {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.section-title {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.datasets-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.dataset-item {
+    padding: 2rem;
+    border-radius: 15px;
+    border: 1px solid var(--glass-border);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.dataset-item:hover {
+    transform: translateY(-3px);
+    border-color: var(--primary);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+}
+
+.dataset-item.completed {
+    border-color: var(--secondary);
+    background: rgba(16, 185, 129, 0.05);
+}
+
+.dataset-item.completed::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--secondary);
+}
+
+.dataset-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.dataset-info h3 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+}
+
+.dataset-meta {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.dataset-meta span {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.dataset-description {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.dataset-progress {
+    margin-bottom: 1.5rem;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--bg-tertiary);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--primary), var(--secondary));
+    border-radius: 4px;
+    transition: width 0.5s ease;
+}
+
+.progress-text {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.dataset-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.status-badge.completed {
+    background: rgba(16, 185, 129, 0.2);
+    color: var(--secondary);
+    border: 1px solid var(--secondary);
+}
+
+.status-badge.in-progress {
+    background: rgba(59, 130, 246, 0.2);
+    color: var(--primary);
+    border: 1px solid var(--primary);
+}
+
+.status-badge.not-started {
+    background: rgba(107, 114, 128, 0.2);
+    color: var(--text-muted);
+    border: 1px solid var(--text-muted);
+}
+
+.sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.sidebar-section {
+    padding: 2rem;
+    border-radius: 15px;
+}
+
+.overall-progress {
+    text-align: center;
+}
+
+.progress-circle {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 1.5rem;
+    position: relative;
+}
+
+.progress-circle svg {
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+}
+
+.progress-circle circle {
+    fill: none;
+    stroke-width: 8;
+}
+
+.progress-circle .bg {
+    stroke: var(--bg-tertiary);
+}
+
+.progress-circle .progress {
+    stroke: var(--primary);
+    stroke-linecap: round;
+    transition: stroke-dasharray 0.8s ease;
+}
+
+.progress-percentage {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+}
+
+.stat-value {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--secondary);
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.stat-label {
+    color: var(--text-secondary);
+    font-size: 0.8rem;
+}
+
+.learning-objectives {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.learning-objectives li {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid var(--glass-border);
+    position: relative;
+    padding-left: 2rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+
+.learning-objectives li::before {
+    content: '✓';
+    position: absolute;
+    left: 0;
+    color: var(--secondary);
+    font-weight: bold;
+}
+
+.learning-objectives li:last-child {
+    border-bottom: none;
+}
+
+.prerequisites {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.prerequisite-item {
+    padding: 0.75rem;
+    background: var(--bg-tertiary);
+    border-radius: 8px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.prerequisite-item i {
+    color: var(--primary);
+}
+
+@media (max-width: 1200px) {
+    .path-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+    
+    .sidebar {
+        order: -1;
+    }
+}
+
+@media (max-width: 768px) {
+    .learning-path-container {
+        padding: 1rem;
+    }
+    
+    .path-meta {
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+    }
+    
+    .path-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .dataset-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .dataset-actions {
+        flex-direction: column;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="learning-path-container">
+    <div class="path-header animate-on-scroll">
+        <h1 class="path-title cyberpunk-text">{{ learning_path.name }}</h1>
+        
+        <div class="path-meta">
+            <div class="difficulty-badge {{ learning_path.difficulty|lower }}">
+                {{ learning_path.get_difficulty_display }}
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-clock"></i>
+                
+                <span>{{ learning_path.estimated_hours }} hours</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-database"></i>
+                <span>{{ learning_path.datasets.count }} datasets</span>
+            </div>
+            <div class="meta-item">
+                <i class="fas fa-calendar"></i>
+                <span>{{ learning_path.created_at|date:"M Y" }}</span>
+            </div>
+        </div>
+        
+        <p class="path-description">{{ learning_path.description }}</p>
+        
+        <div class="path-actions">
+            {% if user.is_authenticated %}
+                <a href="{% url 'sql_code_editor:start_learning_path' path_id=learning_path.id %}" class="btn-cyber">
+                    <i class="fas fa-play"></i> Start Learning Path
+                </a>
+                <button class="btn-outline-cyber" onclick="bookmarkPath()">
+                    <i class="fas fa-bookmark"></i> Bookmark
+                </button>
+            {% else %}
+                <a href="{% url 'sql_code_editor:login' %}" class="btn-cyber">
+                    <i class="fas fa-sign-in-alt"></i> Login to Start
+                </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="path-content">
+        <!-- Main Content -->
+        <div class="datasets-section">
+            <div class="section-title animate-on-scroll">
+                <i class="fas fa-route"></i> Learning Journey
+            </div>
+            
+            <div class="datasets-list">
+                {% for path_dataset in learning_path.datasets.all %}
+                <div class="dataset-item glass-card animate-on-scroll {% if path_dataset.is_completed %}completed{% endif %}">
+                    <div class="dataset-header">
+                        <div class="dataset-info">
+                            <h3>{{ path_dataset.dataset.name }}</h3>
+                            <div class="dataset-meta">
+                                <span><i class="fas fa-signal"></i> {{ path_dataset.dataset.get_difficulty_display }}</span>
+                                <span><i class="fas fa-question-circle"></i> {{ path_dataset.dataset.questions.count }} questions</span>
+                                <span><i class="fas fa-star"></i> {{ path_dataset.dataset.avg_rating|floatformat:1 }} rating</span>
+                            </div>
+                        </div>
+                        <div class="status-badge {% if path_dataset.is_completed %}completed{% elif path_dataset.is_started %}in-progress{% else %}not-started{% endif %}">
+                            {% if path_dataset.is_completed %}
+                                Completed
+                            {% elif path_dataset.is_started %}
+                                In Progress
+                            {% else %}
+                                Not Started
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <p class="dataset-description">{{ path_dataset.dataset.description|truncatewords:30 }}</p>
+                    
+                    {% if path_dataset.description %}
+                    <div style="padding: 1rem; background: var(--bg-tertiary); border-radius: 8px; margin-bottom: 1rem;">
+                        <h4 style="color: var(--accent); margin-bottom: 0.5rem; font-size: 0.9rem;">Learning Focus:</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9rem; margin: 0;">{{ path_dataset.description }}</p>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="dataset-progress">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: {{ path_dataset.progress_percentage|default:0 }}%"></div>
+                        </div>
+                        <div class="progress-text">
+                            {{ path_dataset.completed_questions|default:0 }} of {{ path_dataset.dataset.questions.count }} questions completed
+                        </div>
+                    </div>
+                    
+                    <div class="dataset-actions">
+                        <a href="{% url 'sql_code_editor:dataset_detail' pk=path_dataset.dataset.id %}" class="btn-cyber">
+                            <i class="fas fa-arrow-right"></i> 
+                            {% if path_dataset.is_completed %}Review{% elif path_dataset.is_started %}Continue{% else %}Start{% endif %}
+                        </a>
+                        <a href="{% url 'sql_code_editor:query_playground' %}?dataset={{ path_dataset.dataset.id }}" class="btn-outline-cyber">
+                            <i class="fas fa-play"></i> Playground
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="glass-card" style="text-align: center; padding: 3rem; color: var(--text-muted);">
+                    <i class="fas fa-database" style="font-size: 3rem; margin-bottom: 1rem; display: block;"></i>
+                    <p>No datasets in this learning path yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <!-- Overall Progress -->
+            <div class="sidebar-section glass-card animate-on-scroll">
+                <h3 class="section-title">
+                    <i class="fas fa-chart-pie"></i> Overall Progress
+                </h3>
+                <div class="overall-progress">
+                    <div class="progress-circle">
+                        <svg>
+                            <circle class="bg" cx="60" cy="60" r="52"></circle>
+                            <circle class="progress" cx="60" cy="60" r="52" 
+                                    stroke-dasharray="0 327" 
+                                    data-progress="{{ overall_progress|default:0 }}"></circle>
+                        </svg>
+                        <div class="progress-percentage">{{ overall_progress|default:0 }}%</div>
+                    </div>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span class="stat-value">{{ completed_datasets|default:0 }}</span>
+                            <span class="stat-label">Completed</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ total_questions|default:0 }}</span>
+                            <span class="stat-label">Total Questions</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ solved_questions|default:0 }}</span>
+                            <span class="stat-label">Solved</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-value">{{ estimated_time_left|default:learning_path.estimated_hours }}h</span>
+                            <span class="stat-label">Time Left</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Learning Objectives -->
+            {% if learning_path.learning_objectives %}
+            <div class="sidebar-section glass-card animate-on-scroll">
+                <h3 class="section-title">
+                    <i class="fas fa-bullseye"></i> Learning Objectives
+                </h3>
+                <ul class="learning-objectives">
+                    {% for objective in learning_path.learning_objectives %}
+                    <li>{{ objective }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
+            
+            <!-- Prerequisites -->
+            {% if learning_path.prerequisites %}
+            <div class="sidebar-section glass-card animate-on-scroll">
+                <h3 class="section-title">
+                    <i class="fas fa-list-check"></i> Prerequisites
+                </h3>
+                <div class="prerequisites">
+                    {% for prereq in learning_path.prerequisites %}
+                    <div class="prerequisite-item">
+                        <i class="fas fa-check-circle"></i>
+                        <span>{{ prereq }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- Path Info -->
+            <div class="sidebar-section glass-card animate-on-scroll">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle"></i> Path Information
+                </h3>
+                <div style="display: flex; flex-direction: column; gap: 1rem; color: var(--text-secondary); font-size: 0.9rem;">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Created by:</span>
+                        <span style="color: var(--text-primary);">{{ learning_path.created_by.username }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Last updated:</span>
+                        <span style="color: var(--text-primary);">{{ learning_path.updated_at|date:"M d, Y" }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Difficulty:</span>
+                        <span style="color: var(--text-primary);">{{ learning_path.get_difficulty_display }}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Estimated time:</span>
+                        <span style="color: var(--text-primary);">{{ learning_path.estimated_hours }} hours</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate progress circle
+    const progressCircle = document.querySelector('.progress-circle .progress');
+    if (progressCircle) {
+        const progress = parseInt(progressCircle.dataset.progress);
+        const circumference = 2 * Math.PI * 52;
+        const offset = circumference - (progress / 100) * circumference;
+        
+        setTimeout(() => {
+            progressCircle.style.strokeDasharray = `${circumference - offset} ${circumference}`;
+        }, 500);
+    }
+    
+    // Initialize scroll animations
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+        observer.observe(el);
+    });
+});
+
+function bookmarkPath() {
+    // Implement bookmark functionality
+    alert('Bookmark functionality will be implemented');
+}
+</script>
+{% endblock %}
