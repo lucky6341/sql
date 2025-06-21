@@ -1,0 +1,703 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="TechyVia is your go-to resource for mastering data engineering, covering Python, SQL, BigQuery, Spark, Hadoop, and cloud technologies. Explore in-depth tutorials, hands-on coding examples, and expert insights to elevate your data engineering skills.">
+    <meta property="og:site_name" content="TechyVia">
+    <meta property="og:title" content="TechyVia - Your Tech Resource Hub">
+    <meta property="og:description" content="Explore expert guides on data engineering, Python, SQL, BigQuery, Spark, and more. Level up your skills with hands-on examples.">
+    <meta property="og:image" content="https://techyvia.com/static/index/images/logo.png">
+    <meta property="og:url" content="https://techyvia.com">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="TechyVia - Your Tech Resource Hub">
+    <meta name="twitter:description" content="Master data engineering with top-notch tutorials on Python, SQL, BigQuery, and Spark.">
+    <meta name="twitter:image" content="https://techyvia.com/static/index/images/logo.png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <title>TechyVia - Your Tech Resource Hub</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'shared/favicon.ico' %}">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="{% static 'index/css/index.css' %}">
+
+    <!-- JavaScript -->
+    <script src="{% static 'index/js/index.js' %}" defer></script>
+  </head>
+  <body>
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress">
+      <div class="scroll-progress-bar"></div>
+    </div>
+
+    <!-- Particle Background -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+      <div class="nav-container">
+        <a class="navbar-brand" href="{% url 'index' %}">
+          <i class="fas fa-code"></i> TechyVia
+        </a>
+        
+        <ul class="nav-menu" id="nav-menu">
+          <li class="nav-item dropdown">
+            <a class="nav-link" href="#" id="resourcesDropdown">
+              <i class="fas fa-book-open"></i> Resources
+            </a>
+            <div class="dropdown-menu">
+              <div class="dropdown-section">
+                <h6 class="dropdown-header">Programming</h6>
+                <a class="dropdown-item" href="{% url 'python_basic_concepts' %}">
+                  <i class="fab fa-python"></i> Python
+                </a>
+                <a class="dropdown-item" href="{% url 'sql_basic_concepts' %}">
+                  <i class="fas fa-database"></i> SQL
+                </a>
+                <a class="dropdown-item" href="{% url 'scala' %}">
+                  <i class="fab fa-scala"></i> Scala
+                </a>
+              </div>
+              <div class="dropdown-section">
+                <h6 class="dropdown-header">Data Tools</h6>
+                <a class="dropdown-item" href="{% url 'pandas' %}">
+                  <i class="fab fa-python"></i> Pandas
+                </a>
+                <a class="dropdown-item" href="{% url 'numpy' %}">
+                  <i class="fas fa-chart-line"></i> NumPy
+                </a>
+                <a class="dropdown-item" href="{% url 'pyspark' %}">
+                  <i class="fas fa-fire"></i> PySpark
+                </a>
+              </div>
+              <div class="dropdown-section">
+                <h6 class="dropdown-header">Big Data</h6>
+                <a class="dropdown-item" href="{% url 'hadoop_intro' %}">
+                  <i class="fas fa-server"></i> Hadoop
+                </a>
+                <a class="dropdown-item" href="{% url 'apache_airflow' %}">
+                  <i class="fas fa-wind"></i> Airflow
+                </a>
+                <a class="dropdown-item" href="{% url 'apache_beam' %}">
+                  <i class="fas fa-stream"></i> Beam
+                </a>
+              </div>
+              <div class="dropdown-section">
+                <h6 class="dropdown-header">Cloud</h6>
+                <a class="dropdown-item" href="{% url 'bigquery' %}">
+                  <i class="fab fa-google"></i> BigQuery
+                </a>
+                <a class="dropdown-item" href="{% url 'cloud_storage' %}">
+                  <i class="fas fa-cloud"></i> Cloud Storage
+                </a>
+                <a class="dropdown-item" href="{% url 'data_processing' %}">
+                  <i class="fas fa-cogs"></i> Data Processing
+                </a>
+              </div>
+            </div>
+          </li>
+          
+          <li class="nav-item">
+            <a href="{% url 'blog_list' %}" class="nav-link">
+              <i class="fas fa-blog"></i> Blog
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'forum_home' %}">
+              <i class="fas fa-comments"></i> Forum
+            </a>
+          </li>
+          
+          <li class="nav-item">
+            <a class="nav-link" href="{% url 'game_home' %}">
+              <i class="fas fa-question-circle"></i> Quiz
+            </a>
+          </li> 
+          
+          {% if user.is_authenticated %}
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown">
+                <i class="fas fa-user-circle"></i> {{ user.username }}
+              </a>
+              <div class="dropdown-menu dropdown-menu-right">
+                <a class="dropdown-item" href="{% url 'profile' %}">
+                  <i class="fas fa-user"></i>Profile
+                </a>
+                <div class="dropdown-divider"></div>
+                <a class="dropdown-item" href="{% url 'logout' %}">
+                  <i class="fas fa-sign-out-alt"></i>Logout
+                </a>
+              </div>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a class="btn-outline-cyber" href="{% url 'login' %}">
+                <i class="fas fa-sign-in-alt"></i> Login
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="btn-cyber" href="{% url 'signup' %}">
+                <i class="fas fa-user-plus"></i> Signup
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+        
+        <div class="nav-toggle" id="nav-toggle">
+          <span></span>
+          <span></span>
+          <span></span>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero" id="hero">
+      <div class="hero-container">
+        <div class="hero-content">
+          <h1 class="display-text cyberpunk-text glow-text" data-text="Master Tech Skills with TechyVia">
+            Master Tech Skills with 
+            <span class="gradient-text">TechyVia</span>
+          </h1>
+          <p class="lead">
+            Your ultimate resource for data engineering, cloud technologies, and programming mastery. 
+            Join thousands of developers advancing their careers with cutting-edge skills.
+          </p>
+          <div class="hero-buttons">
+            <button class="btn-cyber" onclick="scrollToSection('features')">
+              <i class="fas fa-rocket"></i> Explore Features
+            </button>
+            <a href="{% url 'signup' %}" class="btn-outline-cyber">
+              <i class="fas fa-user-plus"></i> Join Now
+            </a>
+          </div>
+        </div>
+        
+        <div class="hero-visual">
+          <div class="floating-element" style="background: linear-gradient(45deg, var(--neon-green), var(--accent)); color: var(--bg-primary);">
+            <i class="fab fa-python"></i>
+          </div>
+          <div class="floating-element" style="background: linear-gradient(45deg, var(--primary), var(--electric-blue)); color: var(--bg-primary);">
+            <i class="fas fa-database"></i>
+          </div>
+          <div class="floating-element" style="background: linear-gradient(45deg, var(--warning-orange), var(--neon-yellow)); color: var(--bg-primary);">
+            <i class="fab fa-aws"></i>
+          </div>
+          <div class="floating-element" style="background: linear-gradient(45deg, var(--secondary), var(--cyber-purple)); color: var(--bg-primary);">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="hero-center-element">
+            <div class="inner-ring">
+              <div class="code-symbol">
+                <i class="fas fa-code"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section" id="features">
+      <div class="container">
+        <div class="section-header animate-on-scroll">
+          <h2 class="cyberpunk-text">Our Key Features</h2>
+          <p>Everything you need to accelerate your tech career with cutting-edge tools and resources</p>
+        </div>
+        
+        <div class="features-grid">
+          <div class="feature-card glass-card animate-on-scroll">
+            <div class="feature-icon">
+              <i class="fas fa-map-marked-alt"></i>
+            </div>
+            <h3>Career Roadmaps</h3>
+            <p>Step-by-step guides to become a Data Engineer, Analyst, Scientist and more with industry insights.</p>
+            <button class="btn-outline-cyber" onclick="scrollToSection('roadmaps')">
+              <i class="fas fa-arrow-right"></i> Explore Roadmaps
+            </button>
+          </div>
+          
+          <div class="feature-card glass-card animate-on-scroll">
+            <div class="feature-icon">
+              <i class="fas fa-laptop-code"></i>
+            </div>
+            <h3>Coding Practice</h3>
+            <p>Interactive coding challenges with instant feedback, syntax highlighting, and real-time execution.</p>
+            <button class="btn-outline-cyber" onclick="scrollToSection('coding')">
+              <i class="fas fa-play"></i> Start Coding
+            </button>
+          </div>
+          
+          <div class="feature-card glass-card animate-on-scroll">
+            <div class="feature-icon">
+              <i class="fas fa-question-circle"></i>
+            </div>
+            <h3>Tech Quizzes</h3>
+            <p>Test your knowledge with our interactive quizzes, assessments, and skill evaluations.</p>
+            <a href="{% url 'game_home' %}" class="btn-outline-cyber">
+              <i class="fas fa-trophy"></i> Take a Quiz
+            </a>
+          </div>
+          
+          <div class="feature-card glass-card animate-on-scroll">
+            <div class="feature-icon">
+              <i class="fas fa-users"></i>
+            </div>
+            <h3>Community Forum</h3>
+            <p>Connect with fellow developers, share knowledge, and get help from experienced professionals.</p>
+            <a href="{% url 'forum_home' %}" class="btn-outline-cyber">
+              <i class="fas fa-comments"></i> Join Discussion
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Roadmaps Section -->
+    <section class="section code-section" id="roadmaps">
+      <div class="container">
+        <div class="section-header animate-on-scroll">
+          <h2 class="cyberpunk-text">Career Roadmaps</h2>
+          <p>Structured learning paths designed by industry experts to achieve your career goals</p>
+        </div>
+        
+        <div class="roadmap-grid">
+          <div class="roadmap-card glass-card animate-on-scroll">
+            <div class="roadmap-header">
+              <div class="roadmap-icon beginner">
+                <i class="fas fa-seedling"></i>
+              </div>
+              <div class="roadmap-content">
+                <h3>Data Engineer</h3>
+                <div class="roadmap-meta">Beginner to Advanced • 6-12 months</div>
+              </div>
+            </div>
+            <ul class="roadmap-list">
+              <li>Python Programming Fundamentals</li>
+              <li>SQL and Database Design</li>
+              <li>Apache Spark & Big Data</li>
+              <li>Cloud Platforms (AWS/GCP)</li>
+              <li>Data Pipeline Architecture</li>
+              <li>Real-world Projects</li>
+            </ul>
+            <a href="{% url 'python_basic_concepts' %}" class="btn-cyber" style="margin-top: 1.5rem;">
+              <i class="fas fa-rocket"></i> Start Journey
+            </a>
+          </div>
+          
+          <div class="roadmap-card glass-card animate-on-scroll">
+            <div class="roadmap-header">
+              <div class="roadmap-icon intermediate">
+                <i class="fas fa-chart-line"></i>
+              </div>
+              <div class="roadmap-content">
+                <h3>Data Scientist</h3>
+                <div class="roadmap-meta">Intermediate • 8-15 months</div>
+              </div>
+            </div>
+            <ul class="roadmap-list">
+              <li>Statistics & Probability</li>
+              <li>Machine Learning Algorithms</li>
+              <li>Deep Learning & Neural Networks</li>
+              <li>Data Visualization</li>
+              <li>MLOps and Model Deployment</li>
+              <li>Portfolio Projects</li>
+            </ul>
+            <a href="{% url 'pandas' %}" class="btn-cyber" style="margin-top: 1.5rem;">
+              <i class="fas fa-brain"></i> Explore Path
+            </a>
+          </div>
+          
+          <div class="roadmap-card glass-card animate-on-scroll">
+            <div class="roadmap-header">
+              <div class="roadmap-icon advanced">
+                <i class="fas fa-cloud"></i>
+              </div>
+              <div class="roadmap-content">
+                <h3>Cloud Architect</h3>
+                <div class="roadmap-meta">Advanced • 10-18 months</div>
+              </div>
+            </div>
+            <ul class="roadmap-list">
+              <li>Cloud Fundamentals</li>
+              <li>Infrastructure as Code</li>
+              <li>Containerization & Kubernetes</li>
+              <li>Microservices Architecture</li>
+              <li>Security & Compliance</li>
+              <li>Enterprise Solutions</li>
+            </ul>
+            <a href="{% url 'bigquery' %}" class="btn-cyber" style="margin-top: 1.5rem;">
+              <i class="fas fa-cloud-upload-alt"></i> Begin Path
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Interactive Coding Section -->
+    <section class="section" id="coding">
+      <div class="container">
+        <div class="section-header animate-on-scroll">
+          <h2 class="cyberpunk-text">Interactive Coding</h2>
+          <p>Practice coding with our advanced editor featuring syntax highlighting and real-time execution</p>
+        </div>
+        
+        <div class="code-container">
+          <div class="code-editor-wrapper glass animate-on-scroll">
+            <div class="editor-header">
+              <div class="editor-dot red"></div>
+              <div class="editor-dot yellow"></div>
+              <div class="editor-dot green"></div>
+              <div class="editor-title">Python Playground</div>
+            </div>
+            <textarea id="code-editor" style="width: 100%; height: 300px; background: var(--bg-tertiary); color: var(--text-primary); border: none; padding: 1rem 1.5rem; font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.5; resize: none; outline: none;"># Welcome to TechyVia Code Editor
+# Try some Python code below
+
+def greet(name):
+    return f"Hello, {name}! Welcome to TechyVia"
+
+# Test the function
+result = greet("Future Data Engineer")
+print(result)
+
+# Let's do some data manipulation
+import math
+
+numbers = [1, 4, 9, 16, 25]
+sqrt_numbers = [math.sqrt(num) for num in numbers]
+
+print("Original:", numbers)
+print("Square roots:", sqrt_numbers)</textarea>
+            <button class="run-button" id="run-code">
+              <i class="fas fa-play"></i> Run Code
+            </button>
+          </div>
+          
+          <div class="output-panel glass animate-on-scroll">
+            <div class="output-header">
+              <i class="fas fa-terminal"></i> Output
+            </div>
+            <div class="output-content" id="code-output">
+Click "Run Code" to execute your Python script and see the results here...
+
+This interactive editor supports:
+• Syntax highlighting
+• Auto-completion
+• Error detection
+• Real-time execution
+• Multiple languages
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Quiz Section -->
+    <section class="section code-section" id="quizzes">
+      <div class="container">
+        <div class="section-header animate-on-scroll">
+          <h2 class="cyberpunk-text">Tech Quizzes</h2>
+          <p>Test your knowledge and track your progress with our comprehensive quiz system</p>
+        </div>
+        
+        <div class="quiz-grid">
+          <div class="quiz-card glass-card animate-on-scroll">
+            <div class="quiz-difficulty easy">Easy</div>
+            <h3>Python Fundamentals</h3>
+            <div class="quiz-meta">
+              <span><i class="fas fa-question-circle"></i> 15 Questions</span>
+              <span><i class="fas fa-clock"></i> 20 minutes</span>
+            </div>
+            <div class="quiz-progress">
+              <div class="quiz-progress-bar" style="width: 75%;"></div>
+            </div>
+            <p>Test your basic Python knowledge including variables, functions, loops, and data structures.</p>
+            <a href="{% url 'game_home' %}" class="btn-cyber">
+              <i class="fas fa-play"></i> Start Quiz
+            </a>
+          </div>
+          
+          <div class="quiz-card glass-card animate-on-scroll">
+            <div class="quiz-difficulty medium">Medium</div>
+            <h3>SQL Database Design</h3>
+            <div class="quiz-meta">
+              <span><i class="fas fa-question-circle"></i> 20 Questions</span>
+              <span><i class="fas fa-clock"></i> 30 minutes</span>
+            </div>
+            <div class="quiz-progress">
+              <div class="quiz-progress-bar" style="width: 45%;"></div>
+            </div>
+            <p>Advanced SQL queries, database normalization, indexing, and performance optimization.</p>
+            <a href="{% url 'game_home' %}" class="btn-cyber">
+              <i class="fas fa-database"></i> Take Quiz
+            </a>
+          </div>
+          
+          <div class="quiz-card glass-card animate-on-scroll">
+            <div class="quiz-difficulty hard">Hard</div>
+            <h3>Big Data & Spark</h3>
+            <div class="quiz-meta">
+              <span><i class="fas fa-question-circle"></i> 25 Questions</span>
+              <span><i class="fas fa-clock"></i> 45 minutes</span>
+            </div>
+            <div class="quiz-progress">
+              <div class="quiz-progress-bar" style="width: 20%;"></div>
+            </div>
+            <p>Apache Spark, distributed computing, data processing pipelines, and optimization techniques.</p>
+            <a href="{% url 'game_home' %}" class="btn-cyber">
+              <i class="fas fa-fire"></i> Challenge Yourself
+            </a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tech Resources Section -->
+    <section class="section" id="tech-resources">
+      <div class="container">
+        <div class="section-header animate-on-scroll">
+          <h2 class="cyberpunk-text">Tech Resources Hub</h2>
+          <p>Comprehensive guides and tutorials for all skill levels</p>
+        </div>
+        
+        <div class="resources-grid">
+          <!-- Python Card -->
+          <div class="resource-card glass-card animate-on-scroll">
+            <div class="resource-header bg-primary">
+              <h3>Python</h3>
+            </div>
+            <div class="resource-body">
+              <p>Master Python from basics to advanced concepts with our comprehensive guides.</p>
+              <ul class="resource-list">
+                <li><a href="{% url 'python_basic_concepts' %}" class="resource-link">Python Foundations</a></li>
+                <li><a href="{% url 'python_intermediate_concepts' %}" class="resource-link">Python Elevate</a></li>
+                <li><a href="{% url 'python_advanced_concepts' %}" class="resource-link">Python Mastery</a></li>
+              </ul>
+            </div>
+            <div class="resource-footer">
+              <a href="{% url 'python_basic_concepts' %}" class="btn-outline-cyber">Explore Python</a>
+            </div>
+          </div>
+
+          <!-- SQL Card -->
+          <div class="resource-card glass-card animate-on-scroll">
+            <div class="resource-header bg-success">
+              <h3>SQL</h3>
+            </div>
+            <div class="resource-body">
+              <p>Enhance your database management skills with our SQL resources.</p>
+              <ul class="resource-list">
+                <li><a href="{% url 'sql_basic_concepts' %}" class="resource-link">SQL 101</a></li>
+                <li><a href="{% url 'sql_intermediate_concepts' %}" class="resource-link">SQL Next</a></li>
+                <li><a href="{% url 'sql_advanced_concepts' %}" class="resource-link">SQL Pro</a></li>
+              </ul>
+            </div>
+            <div class="resource-footer">
+              <a href="{% url 'sql_basic_concepts' %}" class="btn-outline-cyber">Explore SQL</a>
+            </div>
+          </div>
+
+          <!-- Big Data Card -->
+          <div class="resource-card glass-card animate-on-scroll">
+            <div class="resource-header bg-info">
+              <h3>Big Data</h3>
+            </div>
+            <div class="resource-body">
+              <p>Master big data technologies with our comprehensive tutorials.</p>
+              <ul class="resource-list">
+                <li><a href="{% url 'hadoop_intro' %}" class="resource-link">Hadoop Essentials</a></li>
+                <li><a href="{% url 'hadoop_components' %}" class="resource-link">Core Building Blocks</a></li>
+                <li><a href="{% url 'hadoop_advanced_topics' %}" class="resource-link">Pro Level Hadoop</a></li>
+                <li><a href="{% url 'hadoop_spark' %}" class="resource-link">Hadoop + Spark</a></li>
+              </ul>
+            </div>
+            <div class="resource-footer">
+              <a href="{% url 'hadoop_intro' %}" class="btn-outline-cyber">Explore Big Data</a>
+            </div>
+          </div>
+
+          <!-- Data Analysis Card -->
+          <div class="resource-card glass-card animate-on-scroll">
+            <div class="resource-header bg-warning">
+              <h3>Data Analysis</h3>
+            </div>
+            <div class="resource-body">
+              <p>Powerful tools for data manipulation and analysis.</p>
+              <ul class="resource-list">
+                <li><a href="{% url 'pandas' %}" class="resource-link">Pandas Mastery</a></li>
+                <li><a href="{% url 'numpy' %}" class="resource-link">NumPy Essentials</a></li>
+                <li><a href="{% url 'matplotlib' %}" class="resource-link">Matplotlib</a></li>
+                <li><a href="{% url 'seaborn' %}" class="resource-link">Seaborn</a></li>
+              </ul>
+            </div>
+            <div class="resource-footer">
+              <a href="{% url 'pandas' %}" class="btn-outline-cyber">Explore Data Analysis</a>
+            </div>
+          </div>
+
+          <!-- Advanced Tools Card -->
+          <div class="resource-card glass-card animate-on-scroll">
+            <div class="resource-header bg-danger">
+              <h3>Advanced Tools</h3>
+            </div>
+            <div class="resource-body">
+              <p>Learn about advanced data processing tools.</p>
+              <ul class="resource-list">
+                <li><a href="{% url 'pyspark' %}" class="resource-link">PySpark Power</a></li>
+                <li><a href="{% url 'scala' %}" class="resource-link">Scala for Data</a></li>
+                <li><a href="{% url 'hadoop_next_steps' %}" class="resource-link">Cloud Evolution</a></li>
+              </ul>
+            </div>
+            <div class="resource-footer">
+              <a href="{% url 'pyspark' %}" class="btn-outline-cyber">Explore Tools</a>
+            </div>
+          </div>
+
+          <!-- Community Card -->
+          <div class="resource-card glass-card animate-on-scroll">
+            <div class="resource-header bg-secondary">
+              <h3>Community</h3>
+            </div>
+            <div class="resource-body">
+              <p>Connect with other learners and experts.</p>
+              <ul class="resource-list">
+                <li><a href="{% url 'blog_list' %}" class="resource-link">Blog</a></li>
+                <li><a href="{% url 'forum_home' %}" class="resource-link">Forum</a></li>
+                <li><a href="{% url 'game_home' %}" class="resource-link">Quiz</a></li>
+              </ul>
+            </div>
+            <div class="resource-footer">
+              <a href="{% url 'blog_list' %}" class="btn-outline-cyber">Join Community</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section" id="testimonials">
+      <div class="container">
+        <div class="section-header animate-on-scroll">
+          <h2 class="cyberpunk-text">What Our Students Say</h2>
+          <p>Real stories from professionals who transformed their careers with TechyVia</p>
+        </div>
+        
+        <div class="testimonial-container animate-on-scroll">
+          <div class="testimonial-card glass-card">
+            <div class="testimonial-content" id="testimonial-content">
+              <div class="quote-mark">
+                <i class="fas fa-quote-left"></i>
+              </div>
+              <p class="testimonial-text" id="testimonial-text">
+                "TechyVia's Python tutorials helped me transition from a business analyst to a data engineer in just 6 months. The clear explanations and practical examples made all the difference."
+              </p>
+              <div class="testimonial-author">
+                <div class="author-avatar" id="author-avatar">SJ</div>
+                <div class="author-info">
+                  <h4 id="author-name">Soundarya</h4>
+                  <p id="author-role">Data Engineer</p>
+                </div>
+              </div>
+            </div>
+            <div class="testimonial-dots">
+              <button class="dot" onclick="showTestimonial(0)"></button>
+              <button class="dot" onclick="showTestimonial(1)"></button>
+              <button class="dot active" onclick="showTestimonial(2)"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section code-section" id="contact">
+      <div class="container">
+        <div class="section-header animate-on-scroll">
+          <h2 class="cyberpunk-text">Get In Touch</h2>
+          <p>Have questions or suggestions? We'd love to hear from you!</p>
+        </div>
+        
+        <form class="contact-form glass-card animate-on-scroll" id="contact-form">
+          <div class="form-group">
+            <label for="name" class="form-label">Name</label>
+            <input type="text" id="name" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" id="email" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="subject" class="form-label">Subject</label>
+            <input type="text" id="subject" class="form-input" required>
+          </div>
+          <div class="form-group">
+            <label for="message" class="form-label">Message</label>
+            <textarea id="message" class="form-textarea" required></textarea>
+          </div>
+          <button type="submit" class="btn-cyber">
+            <i class="fas fa-paper-plane"></i> Send Message
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-container">
+        <div class="footer-section">
+          <h3>TechyVia</h3>
+          <p>Your ultimate destination for mastering data engineering, cloud technologies, and programming skills.</p>
+        </div>
+        
+        <div class="footer-section">
+          <h3>Quick Links</h3>
+          <ul class="footer-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="{% url 'blog_list' %}">Blog</a></li>
+            <li><a href="{% url 'forum_home' %}">Forum</a></li>
+            <li><a href="{% url 'game_home' %}">Quizzes</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h3>Resources</h3>
+          <ul class="footer-links">
+            <li><a href="{% url 'python_basic_concepts' %}">Python</a></li>
+            <li><a href="{% url 'sql_basic_concepts' %}">SQL</a></li>
+            <li><a href="{% url 'bigquery' %}">BigQuery</a></li>
+            <li><a href="{% url 'pyspark' %}">PySpark</a></li>
+          </ul>
+        </div>
+        
+        <div class="footer-section">
+          <h3>Connect</h3>
+          <ul class="footer-links">
+            <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+            <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+            <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+            <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="footer-bottom">
+        <p>© 2024 TechyVia. All rights reserved. Built with 💙 for the tech community.</p>
+      </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="back-to-top">
+      <i class="fas fa-arrow-up"></i>
+    </button>
+  </body>
+</html>

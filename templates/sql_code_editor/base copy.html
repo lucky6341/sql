@@ -1,0 +1,277 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}TechyVia is your go-to resource for mastering data engineering, covering Python, SQL, BigQuery, Spark, Hadoop, and cloud technologies.{% endblock %}">
+    
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:site_name" content="TechyVia">
+    <meta property="og:title" content="{% block og_title %}TechyVia - Your Tech Resource Hub{% endblock %}">
+    <meta property="og:description" content="{% block og_description %}Explore expert guides on data engineering, Python, SQL, BigQuery, Spark, and more. Level up your skills with hands-on examples.{% endblock %}">
+    <meta property="og:image" content="{% block og_image %}{% static 'shared/images/logo.png' %}{% endblock %}">
+    <meta property="og:url" content="{% block og_url %}{{ request.build_absolute_uri }}{% endblock %}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    
+    <!-- Twitter Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}TechyVia - Your Tech Resource Hub{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_description %}Master data engineering with top-notch tutorials on Python, SQL, BigQuery, and Spark.{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{% static 'shared/images/logo.png' %}{% endblock %}">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@300;400;500;600;700&family=Orbitron:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <title>{% block title %}TechyVia - Your Tech Resource Hub{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'shared/favicon.ico' %}">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Base Cyberpunk Styles -->
+    <link rel="stylesheet" href="{% static 'shared/css/cyberpunk-base.css' %}">
+    
+    <!-- Page Specific Styles -->
+    {% block extra_css %}{% endblock %}
+
+    <!-- Custom Inline Styles -->
+    {% block inline_css %}{% endblock %}
+</head>
+<body class="{% block body_class %}{% endblock %}">
+    <!-- Scroll Progress Bar -->
+    <div class="scroll-progress">
+        <div class="scroll-progress-bar"></div>
+    </div>
+
+    <!-- Particle Background -->
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- Navigation -->
+    <nav class="navbar" id="navbar">
+        <div class="nav-container">
+            <a class="navbar-brand" href="{% url 'index' %}">
+                <i class="fas fa-code"></i> TechyVia
+            </a>
+            
+            <ul class="nav-menu" id="nav-menu">
+                <li class="nav-item dropdown">
+                    <a class="nav-link" href="#" id="resourcesDropdown">
+                        <i class="fas fa-book-open"></i> Resources
+                    </a>
+                    <div class="dropdown-menu">
+                        <div class="dropdown-section">
+                            <h6 class="dropdown-header">Programming</h6>
+                            <a class="dropdown-item" href="{% url 'python_basic_concepts' %}">
+                                <i class="fab fa-python"></i> Python
+                            </a>
+                            <a class="dropdown-item" href="{% url 'sql_basic_concepts' %}">
+                                <i class="fas fa-database"></i> SQL
+                            </a>
+                            <a class="dropdown-item" href="{% url 'scala' %}">
+                                <i class="fab fa-scala"></i> Scala
+                            </a>
+                        </div>
+                        <div class="dropdown-section">
+                            <h6 class="dropdown-header">Data Tools</h6>
+                            <a class="dropdown-item" href="{% url 'pandas' %}">
+                                <i class="fab fa-python"></i> Pandas
+                            </a>
+                            <a class="dropdown-item" href="{% url 'numpy' %}">
+                                <i class="fas fa-chart-line"></i> NumPy
+                            </a>
+                            <a class="dropdown-item" href="{% url 'pyspark' %}">
+                                <i class="fas fa-fire"></i> PySpark
+                            </a>
+                        </div>
+                        <div class="dropdown-section">
+                            <h6 class="dropdown-header">Big Data</h6>
+                            <a class="dropdown-item" href="{% url 'hadoop_intro' %}">
+                                <i class="fas fa-server"></i> Hadoop
+                            </a>
+                            <a class="dropdown-item" href="{% url 'apache_airflow' %}">
+                                <i class="fas fa-wind"></i> Airflow
+                            </a>
+                            <a class="dropdown-item" href="{% url 'apache_beam' %}">
+                                <i class="fas fa-stream"></i> Beam
+                            </a>
+                        </div>
+                        <div class="dropdown-section">
+                            <h6 class="dropdown-header">Cloud</h6>
+                            <a class="dropdown-item" href="{% url 'bigquery' %}">
+                                <i class="fab fa-google"></i> BigQuery
+                            </a>
+                            <a class="dropdown-item" href="{% url 'cloud_storage' %}">
+                                <i class="fas fa-cloud"></i> Cloud Storage
+                            </a>
+                            <a class="dropdown-item" href="{% url 'data_processing' %}">
+                                <i class="fas fa-cogs"></i> Data Processing
+                            </a>
+                        </div>
+                    </div>
+                </li>
+                
+                <li class="nav-item">
+                    <a href="{% url 'blog_list' %}" class="nav-link {% if request.resolver_match.url_name == 'blog_list' %}active{% endif %}">
+                        <i class="fas fa-blog"></i> Blog
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {% if 'forum' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'forum_home' %}">
+                        <i class="fas fa-comments"></i> Forum
+                    </a>
+                </li>
+                
+                <li class="nav-item">
+                    <a class="nav-link {% if 'game' in request.resolver_match.url_name %}active{% endif %}" href="{% url 'game_home' %}">
+                        <i class="fas fa-question-circle"></i> Quiz
+                    </a>
+                </li> 
+                
+                {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown">
+                            <i class="fas fa-user-circle"></i> {{ user.username }}
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right">
+                            <a class="dropdown-item" href="{% url 'profile' %}">
+                                <i class="fas fa-user"></i> Profile
+                            </a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="{% url 'logout' %}">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </a>
+                        </div>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="btn-outline-cyber" href="{% url 'login' %}">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn-cyber" href="{% url 'signup' %}">
+                            <i class="fas fa-user-plus"></i> Signup
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+            
+            <div class="nav-toggle" id="nav-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        {% block content %}
+        <!-- Page content goes here -->
+        {% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <div class="footer-brand">
+                    <i class="fas fa-code"></i>
+                    <h3>TechyVia</h3>
+                </div>
+                <p class="footer-description">
+                    Your ultimate destination for mastering data engineering, cloud technologies, and programming skills.
+                </p>
+                <div class="social-links">
+                    <a href="#" class="social-link" aria-label="Twitter">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" class="social-link" aria-label="LinkedIn">
+                        <i class="fab fa-linkedin"></i>
+                    </a>
+                    <a href="#" class="social-link" aria-label="GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" class="social-link" aria-label="Discord">
+                        <i class="fab fa-discord"></i>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul class="footer-links">
+                    <li><a href="{% url 'index' %}"><i class="fas fa-home"></i> Home</a></li>
+                    <li><a href="{% url 'blog_list' %}"><i class="fas fa-blog"></i> Blog</a></li>
+                    <li><a href="{% url 'forum_home' %}"><i class="fas fa-comments"></i> Forum</a></li>
+                    <li><a href="{% url 'game_home' %}"><i class="fas fa-question-circle"></i> Quizzes</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Resources</h3>
+                <ul class="footer-links">
+                    <li><a href="{% url 'python_basic_concepts' %}"><i class="fab fa-python"></i> Python</a></li>
+                    <li><a href="{% url 'sql_basic_concepts' %}"><i class="fas fa-database"></i> SQL</a></li>
+                    <li><a href="{% url 'bigquery' %}"><i class="fab fa-google"></i> BigQuery</a></li>
+                    <li><a href="{% url 'pyspark' %}"><i class="fas fa-fire"></i> PySpark</a></li>
+                </ul>
+            </div>
+            
+            <div class="footer-section">
+                <h3>Connect</h3>
+                <ul class="footer-links">
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+                    <li><a href="#"><i class="fab fa-github"></i> GitHub</a></li>
+                    <li><a href="#"><i class="fab fa-discord"></i> Discord</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <p>© 2024 TechyVia. All rights reserved. Built with 💙 for the tech community.</p>
+                <div class="footer-bottom-links">
+                    <a href="#">Privacy Policy</a>
+                    <a href="#">Terms of Use</a>
+                    <a href="#">Sitemap</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Back to Top Button -->
+    <button class="back-to-top" id="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- Base JavaScript -->
+    <script src="{% static 'shared/js/cyberpunk-base.js' %}"></script>
+    
+    <!-- Page Specific JavaScript -->
+    {% block extra_js %}{% endblock %}
+
+    <!-- Custom Inline JavaScript -->
+    {% block inline_js %}{% endblock %}
+
+    <!-- Django Messages -->
+    {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+                <div class="message message-{{ message.tags }}">
+                    <i class="fas fa-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}exclamation-circle{% elif message.tags == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %}"></i>
+                    {{ message }}
+                    <button class="message-close" onclick="this.parentElement.remove()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</body>
+</html>
